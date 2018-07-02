@@ -1,12 +1,25 @@
 {
   "name": "milkdrop-editor-electron",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Edit Milkdrop presets with Butterchurn visualizer",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jberg/milkdrop-editor-electron.git"
+  },
+  "author": "Jordan Berg <jordannealberg@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
     "electron": "2.0.0"
+  },
+  "dependencies": {
+    "butterchurn": "^2.4.11",
+    "butterchurn-presets": "^2.4.7",
+    "jquery": "^3.3.1",
+    "lodash": "^4.17.10",
+    "milkdrop-preset-converter": "^0.0.3"
   }
 }

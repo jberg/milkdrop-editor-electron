@@ -2,17 +2,29 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>Butterchurn Demo</title>
+    <meta name="description" content="Butterchurn Demo Example">
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
-
+    <div id="mainWrapper">
+      <div id="audioSelectWrapper">
+        <div id="localFileBut">
+          <span>Load local files</span>
+        </div>
+        <div id="micSelect">
+          <span>Use Mic</span>
+        </div>
+      </div>
+      <div id="presetControls">
+        <div>Preset: <select id="presetSelect"></select></div>
+        <div>Cycle: <input type="checkbox" id="presetCycle" checked></input>
+                    <input type="number" id="presetCycleLength"step="1" value="15" min="1"></input></div>
+        <div>Random: <input type="checkbox" id="presetRandom" checked></input></div>
+      </div>
+      <canvas id='canvas' width='800' height='600'>
+      </canvas>
+    </div>
     <script>
-      // You can also require other files to run in this process
       require('./renderer.js')
     </script>
   </body>
