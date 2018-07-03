@@ -1,11 +1,11 @@
 const $ = require('jquery');
 const _ = require('lodash');
+const { ipcRenderer } = require('electron');
 const butterchurn = require('butterchurn');
 const butterchurnExtraImages = require('butterchurn/lib/butterchurnExtraImages.min.js');
 const butterchurnPresets = require('butterchurn-presets');
 const butterchurnPresetsExtra = require('butterchurn-presets/lib/butterchurnPresetsExtra.min.js');
 const butterchurnPresetsExtra2 = require('butterchurn-presets/lib/butterchurnPresetsExtra2.min.js');
-const milkdropPresetConverter = require('milkdrop-preset-converter/dist/milkdrop-preset-converter-node.min.js');
 
 var visualizer = null;
 var rendering = false;
@@ -249,8 +249,7 @@ mainWrapper.addEventListener('drop', (e) => {
     if (file.name.match(/\.milk/)) {
       var reader = new FileReader();
       reader.onload = (e2) => {
-        var convertedPreset = milkdropPresetConverter.convertPreset(reader.result, false);
-        visualizer.loadPreset(convertedPreset, 2.7);
+        ipcRenderer.send('preset-data', reader.result);
       }
 
       reader.readAsText(file);
@@ -264,6 +263,10 @@ mainWrapper.addEventListener('drop', (e) => {
       reader.readAsText(file);
     }
   }
+});
+
+ipcRenderer.on('converted-preset', (event, preset) => {
+  visualizer.loadPreset(preset, 2.7);
 });
 
 initPlayer();
