@@ -85,6 +85,21 @@ function connectMicAudio(sourceNode, audioContext) {
   startRenderer();
 }
 
+$("#localPresetBut").click(() => {
+  const fileSelector = $('<input type="file" />');
+
+  fileSelector[0].onchange = (event) => {
+    const file = fileSelector[0].files[0];
+    const reader = new FileReader();
+    reader.onload = (e2) => {
+      ipcRenderer.send('preset-data', reader.result);
+    }
+    reader.readAsText(file);
+  }
+
+  fileSelector.click();
+});
+
 $("#localFileBut").click(function() {
   $("#audioSelectWrapper").css('display', 'none');
 
@@ -122,32 +137,6 @@ function initPlayer() {
   });
   visualizer.loadExtraImages(butterchurnExtraImages.getImages());
 }
-
-var mainWrapper = document.getElementById('mainWrapper');
-mainWrapper.addEventListener('dragover', (e) => {
-  e.stopPropagation();
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'copy';
-});
-
-// Get file data on drop
-mainWrapper.addEventListener('drop', (e) => {
-  e.stopPropagation();
-  e.preventDefault();
-
-  var files = e.dataTransfer.files;
-  for (var i = 0; i < files.length; i++) {
-    var file = files[i];
-    if (file.name.match(/\.milk/)) {
-      var reader = new FileReader();
-      reader.onload = (e2) => {
-        ipcRenderer.send('preset-data', reader.result);
-      }
-
-      reader.readAsText(file);
-    }
-  }
-});
 
 ipcRenderer.on('converted-preset', (event, preset) => {
   visualizer.loadPreset(preset, 2.7);
