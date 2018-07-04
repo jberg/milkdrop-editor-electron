@@ -3,23 +3,12 @@ const _ = require('lodash');
 const { ipcRenderer } = require('electron');
 const butterchurn = require('butterchurn');
 const butterchurnExtraImages = require('butterchurn/lib/butterchurnExtraImages.min.js');
-const butterchurnPresets = require('butterchurn-presets');
-const butterchurnPresetsExtra = require('butterchurn-presets/lib/butterchurnPresetsExtra.min.js');
-const butterchurnPresetsExtra2 = require('butterchurn-presets/lib/butterchurnPresetsExtra2.min.js');
 
 var visualizer = null;
 var rendering = false;
 var audioContext = null;
 var sourceNode = null;
 var delayedAudible = null;
-var cycleInterval = null;
-var presets = {};
-var presetKeys = [];
-var presetIndexHist = [];
-var presetIndex = 0;
-var presetCycle = true;
-var presetCycleLength = 15000;
-var presetRandom = true;
 var canvas = document.getElementById('canvas');
 
 function connectToAudioAnalyzer(sourceNode) {
@@ -96,79 +85,6 @@ function connectMicAudio(sourceNode, audioContext) {
   startRenderer();
 }
 
-function nextPreset(blendTime = 5.7) {
-  presetIndexHist.push(presetIndex);
-
-  var numPresets = presetKeys.length;
-  if (presetRandom) {
-    presetIndex = Math.floor(Math.random() * presetKeys.length);
-  } else {
-    presetIndex = (presetIndex + 1) % numPresets;
-  }
-
-  visualizer.loadPreset(presets[presetKeys[presetIndex]], blendTime);
-  $('#presetSelect').val(presetIndex);
-
-  restartCycleInterval();
-}
-
-function prevPreset(blendTime = 5.7) {
-  var numPresets = presetKeys.length;
-  if (presetIndexHist.length > 0) {
-    presetIndex = presetIndexHist.pop();
-  } else {
-    presetIndex = ((presetIndex - 1) + numPresets) % numPresets;
-  }
-
-  visualizer.loadPreset(presets[presetKeys[presetIndex]], blendTime);
-  $('#presetSelect').val(presetIndex);
-
-  restartCycleInterval();
-}
-
-function restartCycleInterval() {
-  if (cycleInterval) {
-    clearInterval(cycleInterval);
-    cycleInterval = null;
-  }
-
-  if (presetCycle) {
-    cycleInterval = setInterval(() => {
-      nextPreset(2.7);
-    }, presetCycleLength);
-  }
-}
-
-$(document).keydown((e) => {
-  if (e.which === 32 || e.which === 39) {
-    nextPreset(5);
-  } else if (e.which === 8 || e.which === 37) {
-    prevPreset();
-  } else if (e.which === 72) {
-    nextPreset(0);
-  }
-});
-
-$('#presetSelect').change((evt) => {
-  presetIndexHist.push(presetIndex);
-  presetIndex = parseInt($('#presetSelect').val());
-  visualizer.loadPreset(presets[presetKeys[presetIndex]], 5.7);
-});
-
-$('#presetCycle').change(() => {
-  presetCycle = $('#presetCycle').is(':checked');
-  restartCycleInterval();
-});
-
-$('#presetCycleLength').change((evt) => {
-  presetCycleLength = parseInt($('#presetCycleLength').val() * 1000);
-  restartCycleInterval();
-});
-
-$('#presetRandom').change(() => {
-  presetRandom = $('#presetRandom').is(':checked');
-});
-
 $("#localFileBut").click(function() {
   $("#audioSelectWrapper").css('display', 'none');
 
@@ -196,28 +112,6 @@ function initPlayer() {
   AudioContext = window.AudioContext = (window.AudioContext || window.webkitAudioContext);
   audioContext = new AudioContext();
 
-  presets = {};
-  if (butterchurnPresets) {
-    Object.assign(presets, butterchurnPresets.getPresets());
-  }
-  if (butterchurnPresetsExtra) {
-    Object.assign(presets, butterchurnPresetsExtra.getPresets());
-  }
-  if (butterchurnPresetsExtra2) {
-    Object.assign(presets, butterchurnPresetsExtra2.getPresets());
-  }
-  presets = _(presets).toPairs().sortBy(([k, v]) => k.toLowerCase()).fromPairs().value();
-  presetKeys = _.keys(presets);
-  presetIndex = Math.floor(Math.random() * presetKeys.length);
-
-  var presetSelect = document.getElementById('presetSelect');
-  for(var i = 0; i < presetKeys.length; i++) {
-      var opt = document.createElement('option');
-      opt.innerHTML = presetKeys[i].substring(0,60) + (presetKeys[i].length > 60 ? '...' : '');
-      opt.value = i;
-      presetSelect.appendChild(opt);
-  }
-
   visualizer = butterchurn.createVisualizer(audioContext, canvas , {
     width: 800,
     height: 600,
@@ -227,8 +121,6 @@ function initPlayer() {
     textureRatio: 1,
   });
   visualizer.loadExtraImages(butterchurnExtraImages.getImages());
-  nextPreset(0);
-  restartCycleInterval();
 }
 
 var mainWrapper = document.getElementById('mainWrapper');
@@ -250,14 +142,6 @@ mainWrapper.addEventListener('drop', (e) => {
       var reader = new FileReader();
       reader.onload = (e2) => {
         ipcRenderer.send('preset-data', reader.result);
-      }
-
-      reader.readAsText(file);
-    } else if (file.name.match(/\.json/)) {
-      var reader = new FileReader();
-      reader.onload = (e2) => {
-        var preset = JSON.parse(reader.result);
-        visualizer.loadPreset(preset, 2.7);
       }
 
       reader.readAsText(file);
