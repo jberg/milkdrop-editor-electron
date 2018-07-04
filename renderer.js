@@ -9,6 +9,7 @@ var rendering = false;
 var audioContext = null;
 var sourceNode = null;
 var delayedAudible = null;
+var currentPresetParts = {};
 var canvas = document.getElementById('canvas');
 
 function connectToAudioAnalyzer(sourceNode) {
@@ -123,6 +124,125 @@ $("#micSelect").click(() => {
   });
 });
 
+function hideAllSelect () {
+  $("#presetEquationsSelect").hide();
+  $("#shapeSelect").hide();
+  $("#shapeEquationsSelect").hide();
+  $("#waveSelect").hide();
+  $("#waveEquationsSelect").hide();
+  $("#shadersSelect").hide();
+}
+
+$("#presetPartSelect").change(function (evt) {
+  hideAllSelect();
+
+  if (this.value === 'preset') {
+    $("#presetEquationsSelect").val('presetInit').trigger('change').show();
+  } else if (this.value === 'shapes') {
+    $("#shapeSelect").val('shape1').show().trigger('change');
+  } else if (this.value === 'waves') {
+    $("#waveSelect").val('wave1').show().trigger('change');
+  } else if (this.value === 'shaders') {
+    $("#shadersSelect").val('shaderWarp').trigger('change').show();
+  }
+});
+
+$("#presetEquationsSelect").change(function (evt) {
+  if (this.value === "presetInit") {
+    $("#editor").val(_.get(currentPresetParts, 'presetInit', ''));
+  } else if (this.value === "presetPerFrame") {
+    $("#editor").val(_.get(currentPresetParts, 'perFrame', ''));
+  } else if (this.value === "presetPerPixel") {
+    $("#editor").val(_.get(currentPresetParts, 'perVertex', ''));
+  }
+});
+
+function getSelectedShape () {
+  const shapeSelected = $("#shapeSelect").val();
+  let shapeNum;
+  if (shapeSelected === "shape1") {
+    shapeNum = 0;
+  } else if (shapeSelected === "shape2") {
+    shapeNum = 1;
+  } else if (shapeSelected === "shape3") {
+    shapeNum = 2;
+  } else if (shapeSelected === "shape4") {
+    shapeNum = 3;
+  }
+
+  return shapeNum;
+}
+
+function getSelectedShapeEQ () {
+  const shapeEQSelected = $("#shapeEquationsSelect").val();
+  let shapeEQ;
+  if (shapeEQSelected === "shapeInit") {
+    shapeEQ = 'init_eqs_str';
+  } else if (shapeEQSelected === "shapePerFrame") {
+    shapeEQ = 'frame_eqs_str';
+  }
+
+  return shapeEQ;
+}
+
+$("#shapeSelect").change(function (evt) {
+  $("#shapeEquationsSelect").val('shapeInit').trigger('change').show();
+});
+
+$("#shapeEquationsSelect").change(function (evt) {
+  const shapeNum = getSelectedShape();
+  const shapeEQ = getSelectedShapeEQ();
+  $("#editor").val(_.get(currentPresetParts, `shapes[${shapeNum}].${shapeEQ}`, ''));
+});
+
+function getSelectedWave () {
+  const waveSelected = $("#waveSelect").val();
+  let waveNum;
+  if (waveSelected === "wave1") {
+    waveNum = 0;
+  } else if (waveSelected === "wave2") {
+    waveNum = 1;
+  } else if (waveSelected === "wave3") {
+    waveNum = 2;
+  } else if (waveSelected === "wave4") {
+    waveNum = 3;
+  }
+
+  return waveNum;
+}
+
+function getSelectedWaveEQ () {
+  const waveEQSelected = $("#waveEquationsSelect").val();
+  let waveEQ;
+  if (waveEQSelected === "waveInit") {
+    waveEQ = 'init_eqs_str';
+  } else if (waveEQSelected === "wavePerFrame") {
+    waveEQ = 'frame_eqs_str';
+  } else if (waveEQSelected === "wavePerPoint") {
+    waveEQ = 'point_eqs_str';
+  }
+
+  return waveEQ;
+}
+
+$("#waveSelect").change(function (evt) {
+  $("#waveEquationsSelect").val('waveInit').trigger('change').show();
+});
+
+$("#waveEquationsSelect").change(function (evt) {
+  const waveNum = getSelectedWave();
+  const waveEQ = getSelectedWaveEQ();
+  $("#editor").val(_.get(currentPresetParts, `waves[${waveNum}].${waveEQ}`, ''));
+});
+
+$("#shadersSelect").change(function (evt) {
+  if (this.value === 'shaderWarp') {
+    $("#editor").val(currentPresetParts.warp);
+  } else if (this.value === 'shaderComp') {
+    $("#editor").val(currentPresetParts.comp);
+  }
+});
+
 function initPlayer() {
   AudioContext = window.AudioContext = (window.AudioContext || window.webkitAudioContext);
   audioContext = new AudioContext();
@@ -139,6 +259,9 @@ function initPlayer() {
 }
 
 ipcRenderer.on('converted-preset', (event, convertedPreset, presetParts) => {
+  currentPresetParts = presetParts;
+  hideAllSelect();
+  $("#presetPartSelect").val('preset').trigger('change').show();
   visualizer.loadPreset(convertedPreset, 2.7);
 });
 
