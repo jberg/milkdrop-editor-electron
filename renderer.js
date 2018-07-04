@@ -138,8 +138,8 @@ function initPlayer() {
   visualizer.loadExtraImages(butterchurnExtraImages.getImages());
 }
 
-ipcRenderer.on('converted-preset', (event, preset) => {
-  visualizer.loadPreset(preset, 2.7);
+ipcRenderer.on('converted-preset', (event, convertedPreset, presetParts) => {
+  visualizer.loadPreset(convertedPreset, 2.7);
 });
 
 initPlayer();

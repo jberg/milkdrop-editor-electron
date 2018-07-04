@@ -48,7 +48,8 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-ipcMain.on('preset-data', (event, preset) => {
-  const convertedPreset = milkdropPresetConverter.convertPreset(preset, false);
-  event.sender.send('converted-preset', convertedPreset);
+ipcMain.on('preset-data', (event, presetText) => {
+  const presetParts = milkdropPresetConverter.splitPreset(presetText);
+  const convertedPreset = milkdropPresetConverter.convertPresetMap(presetParts, false);
+  event.sender.send('converted-preset', convertedPreset, presetParts);
 });
