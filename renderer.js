@@ -243,6 +243,40 @@ $("#shadersSelect").change(function (evt) {
   }
 });
 
+$("#compilePresetBut").click(() => {
+  const editorText = $("#editor").val();
+  const presetPartSelected = $("#presetPartSelect").val();
+  if (presetPartSelected === 'preset') {
+    const presetEQSelected = $("#presetEquationsSelect").val();
+    if (presetEQSelected === "presetInit") {
+      currentPresetParts.presetInit = editorText;
+    } else if (presetEQSelected === "presetPerFrame") {
+      currentPresetParts.perFrame = editorText;
+    } else if (presetEQSelected === "presetPerPixel") {
+      currentPresetParts.perVertex = editorText;
+    }
+  } else if (presetPartSelected === 'shapes') {
+    const shapeNum = getSelectedShape();
+    const shapeEQ = getSelectedShapeEQ();
+
+    _.set(currentPresetParts, `shapes[${shapeNum}].${shapeEQ}`, editorText);
+  } else if (presetPartSelected === 'waves') {
+    const waveNum = getSelectedWave();
+    const waveEQ = getSelectedWaveEQ();
+
+    _.set(currentPresetParts, `waves[${waveNum}].${waveEQ}`, editorText);
+  } else if (presetPartSelected === 'shaders') {
+    const shaderSelected = $("#shadersSelect").val();
+    if (shaderSelected === 'shaderWarp') {
+      currentPresetParts.warp = editorText;
+    } else if (shaderSelected === 'shaderComp') {
+      currentPresetParts.comp = editorText;
+    }
+  }
+
+  ipcRenderer.send('preset-map', currentPresetParts);
+});
+
 function initPlayer() {
   AudioContext = window.AudioContext = (window.AudioContext || window.webkitAudioContext);
   audioContext = new AudioContext();
@@ -263,6 +297,10 @@ ipcRenderer.on('converted-preset', (event, convertedPreset, presetParts) => {
   hideAllSelect();
   $("#presetPartSelect").val('preset').trigger('change').show();
   visualizer.loadPreset(convertedPreset, 2.7);
+});
+
+ipcRenderer.on('converted-preset-map', (event, convertedPreset) => {
+  visualizer.loadPreset(convertedPreset, 0.0);
 });
 
 initPlayer();

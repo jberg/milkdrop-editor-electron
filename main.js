@@ -53,3 +53,8 @@ ipcMain.on('preset-data', (event, presetText) => {
   const convertedPreset = milkdropPresetConverter.convertPresetMap(presetParts, false);
   event.sender.send('converted-preset', convertedPreset, presetParts);
 });
+
+ipcMain.on('preset-map', (event, presetParts) => {
+  const convertedPreset = milkdropPresetConverter.convertPresetMap(presetParts, false);
+  event.sender.send('converted-preset-map', convertedPreset);
+});
