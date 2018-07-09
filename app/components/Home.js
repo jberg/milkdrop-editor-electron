@@ -4,6 +4,7 @@ import { ipcRenderer } from 'electron';
 import butterchurn from 'butterchurn';
 import butterchurnExtraImages from 'butterchurn/lib/butterchurnExtraImages.min';
 import styles from './Home.css';
+import PresetPartSelector from './PresetPartSelector';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -147,58 +148,8 @@ export default class Home extends React.Component {
     }
   }
 
-  onPresetPartSelect(e) {
-    const presetPartSelected = e.target.value;
-    if (presetPartSelected === 'preset') {
-      this.setState({
-        presetPartSelected,
-        presetEquationsSelected: 'presetInit'
-      });
-    } else if (presetPartSelected === 'shapes') {
-      this.setState({
-        presetPartSelected,
-        shapeSelected: 'shape1',
-        shapeEquationsSelected: 'shapeInit'
-      });
-    } else if (presetPartSelected === 'waves') {
-      this.setState({
-        presetPartSelected,
-        waveSelected: 'wave1',
-        waveEquationsSelected: 'waveInit'
-      });
-    } else if (presetPartSelected === 'shaders') {
-      this.setState({ presetPartSelected, shaderSelected: 'warp' });
-    }
-  }
-
-  onPresetEquationsSelect(e) {
-    const presetEquationsSelected = e.target.value;
-    this.setState({ presetEquationsSelected });
-  }
-
-  onShapeSelect(e) {
-    const shapeSelected = e.target.value;
-    this.setState({ shapeSelected, shapeEquationsSelected: 'shapeInit' });
-  }
-
-  onShapeEquationsSelect(e) {
-    const shapeEquationsSelected = e.target.value;
-    this.setState({ shapeEquationsSelected });
-  }
-
-  onWaveSelect(e) {
-    const waveSelected = e.target.value;
-    this.setState({ waveSelected, waveEquationsSelected: 'waveInit' });
-  }
-
-  onWaveEquationsSelect(e) {
-    const waveEquationsSelected = e.target.value;
-    this.setState({ waveEquationsSelected });
-  }
-
-  onShaderSelect(e) {
-    const shaderSelected = e.target.value;
-    this.setState({ shaderSelected });
+  updatePresetPartSelector(m) {
+    this.setState(m);
   }
 
   onPresetPartChange(e) {
@@ -251,103 +202,16 @@ export default class Home extends React.Component {
               >
                 <span>Recompile preset</span>
               </div>
-              <div>
-                <select
-                  value={this.state.presetPartSelected}
-                  onChange={e => this.onPresetPartSelect(e)}
-                >
-                  <option value="preset">Preset Equations</option>
-                  <option value="shapes">Shapes</option>
-                  <option value="waves">Waves</option>
-                  <option value="shaders">Shaders</option>
-                </select>
-                <select
-                  value={this.state.presetEquationsSelected}
-                  onChange={e => this.onPresetEquationsSelect(e)}
-                  style={{
-                    display:
-                      this.state.presetPartSelected === 'preset'
-                        ? 'inline-block'
-                        : 'none'
-                  }}
-                >
-                  <option value="presetInit">Init Equations</option>
-                  <option value="presetPerFrame">Per Frame Equations</option>
-                  <option value="presetPerPixel">Per Pixel Equations</option>
-                </select>
-                <select
-                  value={this.state.shapeSelected}
-                  onChange={e => this.onShapeSelect(e)}
-                  style={{
-                    display:
-                      this.state.presetPartSelected === 'shapes'
-                        ? 'inline-block'
-                        : 'none'
-                  }}
-                >
-                  <option value="shape1">Shape 1</option>
-                  <option value="shape2">Shape 2</option>
-                  <option value="shape3">Shape 3</option>
-                  <option value="shape4">Shape 4</option>
-                </select>
-                <select
-                  value={this.state.shapeEquationsSelected}
-                  onChange={e => this.onShapeEquationsSelect(e)}
-                  style={{
-                    display:
-                      this.state.presetPartSelected === 'shapes'
-                        ? 'inline-block'
-                        : 'none'
-                  }}
-                >
-                  <option value="shapeInit">Shape Init Equations</option>
-                  <option value="shapePerFrame">
-                    Shape Per Frame Equations
-                  </option>
-                </select>
-                <select
-                  value={this.state.waveSelected}
-                  onChange={e => this.onWaveSelect(e)}
-                  style={{
-                    display:
-                      this.state.presetPartSelected === 'waves'
-                        ? 'inline-block'
-                        : 'none'
-                  }}
-                >
-                  <option value="wave1">Wave 1</option>
-                  <option value="wave2">Wave 2</option>
-                  <option value="wave3">Wave 3</option>
-                  <option value="wave4">Wave 4</option>
-                </select>
-                <select
-                  value={this.state.waveEquationsSelected}
-                  onChange={e => this.onWaveEquationsSelect(e)}
-                  style={{
-                    display:
-                      this.state.presetPartSelected === 'waves'
-                        ? 'inline-block'
-                        : 'none'
-                  }}
-                >
-                  <option value="waveInit">Wave Init Equations</option>
-                  <option value="wavePerFrame">WavePer Frame Equations</option>
-                  <option value="wavePerPoint">Wave Per Point Equations</option>
-                </select>
-                <select
-                  value={this.state.shaderSelected}
-                  onChange={e => this.onShaderSelect(e)}
-                  style={{
-                    display:
-                      this.state.presetPartSelected === 'shaders'
-                        ? 'inline-block'
-                        : 'none'
-                  }}
-                >
-                  <option value="shaderWarp">Warp Shader</option>
-                  <option value="shaderComp">Comp Shader</option>
-                </select>
-              </div>
+              <PresetPartSelector
+                updatePresetPartSelector={m => this.updatePresetPartSelector(m)}
+                presetPartSelected={this.state.presetPartSelected}
+                presetEquationsSelected={this.state.presetEquationsSelected}
+                shapeSelected={this.state.shapeSelected}
+                shapeEquationsSelected={this.state.shapeEquationsSelected}
+                waveSelected={this.state.waveSelected}
+                waveEquationsSelected={this.state.waveEquationsSelected}
+                shaderSelected={this.state.shaderSelected}
+              />
               <textarea
                 value={presetText}
                 onChange={e => this.onPresetPartChange(e)}
