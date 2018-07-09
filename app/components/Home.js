@@ -98,7 +98,7 @@ export default class Home extends React.Component {
   }
 
   recompilePreset() {
-    const presetParts = this.state.editedPresetParts;
+    const presetParts = _.cloneDeep(this.state.editedPresetParts);
     ipcRenderer.send('preset-map', presetParts);
     this.setState({ presetParts, presetCompiling: true });
   }
@@ -161,6 +161,10 @@ export default class Home extends React.Component {
     this.setState({ editedPresetParts });
   }
 
+  onPresetDiscardChanges() {
+    this.setState({ editedPresetParts: _.cloneDeep(this.state.presetParts) });
+  }
+
   render() {
     const presetText =
       _.get(this.state.editedPresetParts, this.currentPresetPart()) || '';
@@ -201,6 +205,19 @@ export default class Home extends React.Component {
                 }}
               >
                 <span>Recompile preset</span>
+              </div>
+              <div
+                onClick={() => this.onPresetDiscardChanges()}
+                style={{
+                  display: _.isEqual(
+                    this.state.editedPresetParts,
+                    this.state.presetParts
+                  )
+                    ? 'none'
+                    : 'block'
+                }}
+              >
+                <span>Discard changes</span>
               </div>
               <PresetPartSelector
                 updatePresetPartSelector={m => this.updatePresetPartSelector(m)}
